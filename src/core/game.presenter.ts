@@ -1,4 +1,4 @@
-import { Card, Layer } from './card.entity';
+import { Card, CardSlot, Layer, levelZ } from './card.entity';
 
 export function shuffle(input: any[]) {
   const arr = [...input];
@@ -19,12 +19,16 @@ export function shuffle(input: any[]) {
  */
 
 interface IViewState {
-  data: Layer[];
+  layer: Layer[];
+  allCard: Card[];
+  cardSlot: CardSlot;
 }
 
 const defaultState: () => IViewState = () => {
   return {
-    data: [],
+    layer: [],
+    allCard: [],
+    cardSlot: new CardSlot(),
   };
 };
 
@@ -52,33 +56,81 @@ export class GamePresenter {
     }
 
     const data = shuffle(cards);
-    console.log(cards.map((v) => v.type));
-    console.log(data.map((v) => v.type));
+    // console.log(cards.map((v) => v.type));
+    // console.log(data.map((v) => v.type));
 
     function getCard() {
       return data.pop();
     }
-    const l1 = new Layer([
-      [getCard(), getCard(), getCard(), getCard(), getCard()],
-      [getCard(), 0, 0, 0, getCard()],
-      [getCard(), 0, 0, 0, getCard()],
-      [getCard(), 0, 0, 0, getCard()],
-      [getCard(), getCard(), getCard(), getCard(), getCard()],
-    ]);
+    const l1 = new Layer(
+      [
+        [getCard(), getCard(), getCard(), getCard(), getCard()],
+        [getCard(), 0, 0, 0, getCard()],
+        [getCard(), 0, 0, 0, getCard()],
+        [getCard(), 0, 0, 0, getCard()],
+        [getCard(), getCard(), getCard(), getCard(), getCard()],
+      ],
+      0,
+      0,
+      levelZ(1),
+    );
 
-    const l2 = new Layer([
-      [getCard(), getCard(), getCard(), getCard()],
-      [getCard(), 0, 0, getCard()],
-      [getCard(), 0, 0, getCard()],
-      [getCard(), getCard(), getCard(), getCard()],
-    ]);
+    const l2 = new Layer(
+      [
+        [getCard(), getCard(), getCard(), getCard()],
+        [getCard(), 0, 0, getCard()],
+        [getCard(), 0, 0, getCard()],
+        [getCard(), getCard(), getCard(), getCard()],
+      ],
+      10,
+      10,
+      levelZ(2),
+    );
 
-    const l3 = new Layer([
-      [getCard(), getCard(), getCard()],
-      [getCard(), 0, getCard()],
-      [getCard(), getCard(), getCard()],
-    ]);
+    const l3 = new Layer(
+      [
+        [getCard(), getCard(), getCard()],
+        [getCard(), 0, getCard()],
+        [getCard(), getCard(), getCard()],
+      ],
+      20,
+      20,
+      levelZ(3),
+    );
 
-    this.state.data = [l3];
+    this.state.layer = [l1, l2, l3];
+    this.state.allCard = cards;
+    this.checkBlock();
+    this.forceUpdate();
   }
+
+  click(c: Card) {
+    this.state.cardSlot.add(c);
+    this.checkBlock();
+    this.forceUpdate();
+  }
+
+  checkBlock() {
+    let c = 0;
+    console.log(this.state.allCard.length, 'allCard');
+    this.state.allCard.forEach((a) => {
+      this.state.allCard.forEach((b) => {
+        if (a !== b) {
+          if (a.intersect(b)) {
+            c += 1;
+            console.log(c);
+            // if (a.z > b.z) {
+            //   b.isBlocked = true;
+            // } else {
+            //   a.isBlocked = true;
+            // }
+          }
+        } else {
+          console.log('equal');
+        }
+      });
+    });
+  }
+
+  forceUpdate = () => {};
 }

@@ -30,7 +30,7 @@ export const ImagesMap = {
  * 从底部为第一层，每一层zindex为 10， 20， 30
  * @param level
  */
-const levelZ = (level = 1) => {
+export const levelZ = (level = 1) => {
   return level * 10;
 };
 
@@ -42,13 +42,36 @@ export class Card {
     this.img = ImagesMap[this.type];
   }
 
-  x = 0;
-  y = 0;
-  z = levelZ(1);
+  left = 0;
+  top = 0;
+  right = this.left + CardWidth;
+  bottom = this.top + CardHeight;
+
+  z = 0;
   img = '';
   isBlocked = false;
-  width = CardWidth;
-  height = CardHeight;
+  deleted = false;
+
+  setRect(
+    opt: Partial<{
+      left: number;
+      top: number;
+    }>,
+  ) {
+    this.left = opt.left ?? this.left;
+    this.top = opt.top ?? this.top;
+    this.right = this.left + CardWidth;
+    this.bottom = this.top + CardHeight;
+  }
+
+  intersect(card: Card) {
+    return !(
+      card.left > this.right ||
+      card.right < this.left ||
+      card.top > this.bottom ||
+      card.bottom < this.top
+    );
+  }
 }
 
 /**
@@ -58,30 +81,73 @@ export class Card {
  */
 
 export class Layer {
-  constructor(data?: (Card | 0)[][], topLeft?: number[]) {
+  constructor(data: (Card | 0)[][], left: number, top: number, z: number) {
+    this.left = left;
+    this.top = top;
+    this.right = this.left + 5 * CardWidth;
+    this.bottom = this.top + 5 * CardHeight;
+
     if (data) {
       data.forEach((col, j) => {
         col.forEach((v, i) => {
           if (v) {
-            console.log(v, i * CardWidth);
-            v.x = i * CardWidth;
-            v.y = j * CardHeight;
+            v.setRect({
+              left: i * CardWidth + this.left,
+              top: j * CardHeight + this.top,
+            });
+            v.z = z;
           }
         });
       });
       this.data = data;
     }
-    if (topLeft) {
-      this.topLeft = topLeft;
+  }
+
+  // topLeft = [0, 0];
+  left = 0;
+  top = 0;
+  right = this.left + 5 * CardWidth;
+  bottom = this.top + 5 * CardHeight;
+
+  data: (Card | 0)[][] = [[]]; // 0 表示没有卡片
+}
+
+export class CardSlot {
+  left = 100;
+  top = 400;
+
+  data: Card[] = [];
+
+  add(card: Card) {
+    if (this.data.length < 7) {
+      card.setRect({
+        left: this.left + CardWidth * this.data.length,
+        top: this.top,
+      });
+      this.data.push(card);
+      this.remove(card);
+    } else {
+      // 通知游戏结束
     }
   }
 
-  topLeft = [0, 0];
+  remove(card: Card) {
+    let count = 0;
+    this.data.forEach((v) => {
+      if (v.type === card.type) {
+        count += 1;
+      }
+    });
+    let success = count === 3;
 
-  bottomRight = [
-    this.topLeft[0] + 5 * CardWidth,
-    this.topLeft[1] + 5 * CardHeight,
-  ];
-
-  data: (Card | 0)[][] = [[]]; // 0 表示没有卡片
+    if (success) {
+      this.data = this.data.filter((v) => {
+        if (v.type === card.type) {
+          v.deleted = true;
+          return false;
+        }
+        return true;
+      });
+    }
+  }
 }

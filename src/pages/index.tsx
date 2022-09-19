@@ -1,39 +1,64 @@
+import { CardHeight, CardWidth } from '@/core/card.entity';
 import { GamePresenter } from '@/core/game.presenter';
-import yayJpg from '../assets/yay.jpg';
+import { useEffect } from 'react';
+import { useRef } from 'react';
+import { useState } from 'react';
 import './index.less';
 
-const p = new GamePresenter();
-p.init();
 export default function HomePage() {
+  const [, forceUpdate] = useState({});
+
+  const p = useRef(new GamePresenter()).current;
+
+  useEffect(() => {
+    p.forceUpdate = () => {
+      forceUpdate({});
+      console.log(p.state.allCard.map((v) => v.isBlocked));
+    };
+    p.init();
+  }, []);
+
   return (
     <div>
       <div className="playground">
-        {p.state.data.map((v) => {
+        {p.state.layer.map((v) => {
           return v.data?.map((w) => {
             return w?.map((u) => {
               if (u === 0) {
-                return <div className="empty-card" />;
+                return <div className="empty-card"></div>;
               }
               if (!u) {
                 return null;
               }
-              console.log(!!u.img);
+              if (u.deleted) {
+                return null;
+              }
               return (
                 <img
-                  className="card"
+                  onClick={() => {
+                    p.click(u);
+                  }}
+                  className={`card ${u.isBlocked ? 'isBlocked' : ''}`}
                   src={u.img}
                   style={{
-                    left: u.x,
-                    top: u.y,
+                    left: u.left,
+                    top: u.top,
                     zIndex: u.z,
-                    width: u.width + 'px',
-                    height: u.height + 'px',
+                    width: CardWidth + 'px',
+                    height: CardHeight + 'px',
                   }}
                 ></img>
               );
             });
           });
         })}
+        <div
+          className="slot"
+          style={{
+            left: p.state.cardSlot.left,
+            top: p.state.cardSlot.top,
+          }}
+        ></div>
       </div>
     </div>
   );
