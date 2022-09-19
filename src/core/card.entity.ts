@@ -34,10 +34,11 @@ export const levelZ = (level = 1) => {
   return level * 10;
 };
 
-export const CardWidth = 20;
-export const CardHeight = 28;
+export const CardWidth = 40;
+export const CardHeight = 56;
 
 export class Card {
+
   constructor(public type: ECardType) {
     this.img = ImagesMap[this.type];
   }
@@ -46,11 +47,12 @@ export class Card {
   top = 0;
   right = this.left + CardWidth;
   bottom = this.top + CardHeight;
-
+  width = CardWidth;
+  height = CardHeight;
   z = 0;
   img = '';
   isBlocked = false;
-  deleted = false;
+  deleted = true;
 
   setRect(
     opt: Partial<{
@@ -64,13 +66,10 @@ export class Card {
     this.bottom = this.top + CardHeight;
   }
 
-  intersect(card: Card) {
-    return !(
-      card.left > this.right ||
-      card.right < this.left ||
-      card.top > this.bottom ||
-      card.bottom < this.top
-    );
+  intersect(b: Card) {
+    const a = this
+    return Math.abs(a.left + a.width / 2 - b.left - b.width / 2) < (a.width + b.width) / 2 &&
+      Math.abs(a.top + a.height / 2 - b.top - b.height / 2) < (a.height + b.height) / 2
   }
 }
 
@@ -113,7 +112,7 @@ export class Layer {
 }
 
 export class CardSlot {
-  left = 100;
+  left = 0;
   top = 400;
 
   data: Card[] = [];
@@ -125,10 +124,19 @@ export class CardSlot {
         top: this.top,
       });
       this.data.push(card);
-      this.remove(card);
     } else {
       // 通知游戏结束
+      alert('游戏结束咧')
     }
+  }
+
+  refresh() {
+    this.data.forEach((v, i) => {
+      v.setRect({
+        left: this.left + CardWidth * i,
+        top: this.top,
+      });
+    })
   }
 
   remove(card: Card) {
@@ -141,13 +149,19 @@ export class CardSlot {
     let success = count === 3;
 
     if (success) {
-      this.data = this.data.filter((v) => {
-        if (v.type === card.type) {
-          v.deleted = true;
-          return false;
-        }
-        return true;
-      });
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          this.data = this.data.filter((v) => {
+            if (v.type === card.type) {
+              v.deleted = true;
+              return false;
+            }
+            return true;
+          });
+          resolve(null)
+        }, 400);
+      })
     }
+    return Promise.resolve(null)
   }
 }

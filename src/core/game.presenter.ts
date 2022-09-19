@@ -1,4 +1,4 @@
-import { Card, CardSlot, Layer, levelZ } from './card.entity';
+import { Card, CardSlot, ECardType, Layer, levelZ } from './card.entity';
 
 export function shuffle(input: any[]) {
   const arr = [...input];
@@ -42,7 +42,7 @@ export class GamePresenter {
    * 初始化3层
    */
   init() {
-    let nums = 16 + 12 + 8;
+    let nums = 16 + 12 + 8 + 2 + 12 + 16;
     const types = Array(nums / 3)
       .fill(0)
       .map((_, i) => {
@@ -60,7 +60,9 @@ export class GamePresenter {
     // console.log(data.map((v) => v.type));
 
     function getCard() {
-      return data.pop();
+      const c = data.pop();
+      c.deleted = false
+      return c
     }
     const l1 = new Layer(
       [
@@ -82,8 +84,8 @@ export class GamePresenter {
         [getCard(), 0, 0, getCard()],
         [getCard(), getCard(), getCard(), getCard()],
       ],
-      10,
-      10,
+      20,
+      30,
       levelZ(2),
     );
 
@@ -93,44 +95,131 @@ export class GamePresenter {
         [getCard(), 0, getCard()],
         [getCard(), getCard(), getCard()],
       ],
-      20,
-      20,
+      40,
+      60,
       levelZ(3),
     );
 
-    this.state.layer = [l1, l2, l3];
+    const l4 = new Layer(
+      [
+        [getCard(), 0, getCard()],
+      ],
+      40,
+      60,
+      levelZ(4),
+    );
+    const l5 = new Layer(
+      [
+        [getCard(), getCard(), getCard(), getCard()],
+        [getCard(), 0, 0, getCard()],
+        [getCard(), 0, 0, getCard()],
+        [getCard(), getCard(), getCard(), getCard()],
+      ],
+      20,
+      30,
+      levelZ(5),
+    );
+    const l6 = new Layer(
+      [
+        [getCard(), getCard(), getCard(), getCard(), getCard()],
+        [getCard(), 0, 0, 0, getCard()],
+        [getCard(), 0, 0, 0, getCard()],
+        [getCard(), 0, 0, 0, getCard()],
+        [getCard(), getCard(), getCard(), getCard(), getCard()],
+      ],
+      0,
+      0,
+      levelZ(6),
+    );
+
+
+
+    this.state.layer = [l1, l2, l3, l4, l5, l6];
     this.state.allCard = cards;
     this.checkBlock();
     this.forceUpdate();
   }
 
   click(c: Card) {
-    this.state.cardSlot.add(c);
-    this.checkBlock();
-    this.forceUpdate();
+    if (!c.isBlocked) {
+      this.state.cardSlot.add(c)
+      this.forceUpdate()
+      this.state.cardSlot.remove(c).then(() => {
+        this.forceUpdate()
+        this.state.cardSlot.refresh()
+        this.checkBlock();
+        this.forceUpdate();
+      });
+
+
+    }
+  }
+
+  autoRemove() {
+    const window = {} as Record<ECardType, Card[]>
+    const canClick = this.state.allCard.filter(v => !v.deleted && !v.isBlocked)
+
+    let i = 0
+    let target: Card[] = []
+    while (i < canClick.length) {
+      const v = canClick[i]
+      i += 1
+      if (window[v.type]) {
+        window[v.type].push(v)
+      } else {
+        window[v.type] = []
+      }
+
+      if (window[v.type].length === 3) {
+        target = [...window[v.type]]
+        break
+      }
+    }
+
+    if (target.length) {
+      const v = target.pop()
+      if (v) {
+        this.click(v)
+      }
+      const timer = setInterval(() => {
+        const v = target.pop()
+        if (v) {
+          this.click(v)
+        } else {
+          clearInterval(timer)
+          this.autoRemove()
+        }
+      }, 300)
+
+    } else {
+      alert('无解')
+    }
+
   }
 
   checkBlock() {
-    let c = 0;
-    console.log(this.state.allCard.length, 'allCard');
+    this.state.allCard.forEach(v => {
+      v.isBlocked = false
+    })
+
     this.state.allCard.forEach((a) => {
       this.state.allCard.forEach((b) => {
         if (a !== b) {
-          if (a.intersect(b)) {
-            c += 1;
-            console.log(c);
-            // if (a.z > b.z) {
-            //   b.isBlocked = true;
-            // } else {
-            //   a.isBlocked = true;
-            // }
+          if (!(a.deleted || b.deleted)) {
+            if (a.intersect(b)) {
+              if (a.z > b.z) {
+                b.isBlocked = true;
+              } else {
+                a.isBlocked = true;
+              }
+            }
           }
-        } else {
-          console.log('equal');
         }
+
       });
     });
+    this.forceUpdate()
   }
 
-  forceUpdate = () => {};
+  forceUpdate = () => { };
 }

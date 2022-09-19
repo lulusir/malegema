@@ -13,13 +13,13 @@ export default function HomePage() {
   useEffect(() => {
     p.forceUpdate = () => {
       forceUpdate({});
-      console.log(p.state.allCard.map((v) => v.isBlocked));
+      // console.log(p.state.allCard.map((v) => v.isBlocked));
     };
     p.init();
   }, []);
 
   return (
-    <div>
+    <div className='page'>
       <div className="playground">
         {p.state.layer.map((v) => {
           return v.data?.map((w) => {
@@ -59,6 +59,14 @@ export default function HomePage() {
             top: p.state.cardSlot.top,
           }}
         ></div>
+
+        <button type='button' className='btn' onClick={() => {
+          p.autoRemove()
+        }}>自动碰</button>
+
+<button type='button' className='btn1' onClick={() => {
+          p.init()
+        }}>重来</button>
       </div>
     </div>
   );
