@@ -6,7 +6,8 @@
     "build": "umi build",
     "postinstall": "umi setup",
     "setup": "umi setup",
-    "start": "npm run dev"
+    "start": "npm run dev",
+    "deploy": " gh-pages -d dist"
   },
   "dependencies": {
     "@clean-js/presenter": "^0.1.2",

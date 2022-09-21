@@ -3,5 +3,7 @@ export default {
   npmClient: 'pnpm',
   extraBabelPlugins: [
     "babel-plugin-transform-typescript-metadata",
-  ]
+  ],
+  publicPath: '/malegema',
+  base: '/malegema'
 };
