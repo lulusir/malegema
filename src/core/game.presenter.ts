@@ -1,25 +1,7 @@
-import { entry, injectable, Presenter ,} from '@clean-js/presenter';
+import { injectable, Presenter } from '@clean-js/presenter';
 import { Card, levelZ } from './card';
 import { Layer } from './layer';
 import { CardSlot } from './slot.entity';
-
-entry.showDevtool()
-
-export function shuffle(input: any[]) {
-  const arr = [...input];
-  let length = arr.length,
-    temp,
-    random;
-  while (0 !== length) {
-    random = Math.floor(Math.random() * length);
-    length -= 1;
-    temp = arr[length];
-    arr[length] = arr[random];
-    arr[random] = temp;
-  }
-  return arr;
-}
-
 
 interface IViewState {
   data: {
@@ -61,7 +43,7 @@ const defaultState: () => IViewState = () => {
 
 @injectable()
 export class GamePresenter extends Presenter<IViewState> {
-  constructor(public slot: CardSlot) {
+  constructor(public slot: CardSlot, public layer: Layer) {
     super();
     this.state = defaultState();
   }
@@ -92,14 +74,15 @@ export class GamePresenter extends Presenter<IViewState> {
       cards.push(element);
     }
 
-    const data = shuffle(cards);
+    const data = this.shuffle(cards);
 
     function getCard() {
       const c = data.pop();
       return c;
     }
-
-    new Layer(
+    
+    // 分配卡片，初始化层级
+    this.layer.init(
       [
         [getCard(), getCard(), getCard(), getCard(), getCard()],
         [getCard(), 0, 0, 0, getCard()],
@@ -112,7 +95,7 @@ export class GamePresenter extends Presenter<IViewState> {
       levelZ(1),
     );
 
-    new Layer(
+    this.layer.init(
       [
         [getCard(), getCard(), getCard(), getCard()],
         [getCard(), 0, 0, getCard()],
@@ -124,7 +107,7 @@ export class GamePresenter extends Presenter<IViewState> {
       levelZ(2),
     );
 
-    new Layer(
+    this.layer.init(
       [
         [getCard(), getCard(), getCard()],
         [getCard(), 0, getCard()],
@@ -136,8 +119,21 @@ export class GamePresenter extends Presenter<IViewState> {
     );
 
     this.allCard = cards;
-    this.updateView()
-    this.updateBlock();
+  }
+
+  shuffle(input: any[]) {
+    const arr = [...input];
+    let length = arr.length,
+      temp,
+      random;
+    while (0 !== length) {
+      random = Math.floor(Math.random() * length);
+      length -= 1;
+      temp = arr[length];
+      arr[length] = arr[random];
+      arr[random] = temp;
+    }
+    return arr;
   }
 
   /**
@@ -146,6 +142,7 @@ export class GamePresenter extends Presenter<IViewState> {
   init() {
     this.setSlot()
     this.initCards()
+    this.updateBlock();
     this.updateView()
   }
 
@@ -153,11 +150,17 @@ export class GamePresenter extends Presenter<IViewState> {
     const c = this.allCard.find(v => v.id === id)
     if (c) {
       if (!c.blocked) {
-        this.slot.add(c);
-        this.slot.remove(c).then(() => {
+        const canContinue = this.slot.add(c);
+        if (!canContinue) {
+          alert('游戏结束咧')
+        }  else {
+          this.slot.remove(c).then(() => {
+            this.updateBlock()
+            this.updateView()
+          });
+          this.updateBlock()
           this.updateView()
-        });
-        this.updateView()
+        }
       }
     }
   }
@@ -186,11 +189,9 @@ export class GamePresenter extends Presenter<IViewState> {
       });
     });
 
-    this.updateView()
   }
 
   updateView() {
-    console.log(this.allCard)
     this.setState((s) => {
       s.data = this.allCard.map((v) => {
         return {

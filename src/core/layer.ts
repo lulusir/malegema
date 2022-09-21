@@ -7,14 +7,6 @@
 import { Card } from './card';
 
 export class Layer {
-  constructor(data: (Card | 0)[][], left: number, top: number, z: number) {
-    this.left = left;
-    this.top = top;
-    this.z = z;
-    this.data = data;
-
-    this.setCardsPosition();
-  }
 
   left = 0;
 
@@ -23,6 +15,15 @@ export class Layer {
   z = 0;
 
   data: (Card | 0)[][] = [[]]; // 0 表示没有卡片
+
+  init(data: (Card | 0)[][], left: number, top: number, z: number) {
+    this.left = left;
+    this.top = top;
+    this.z = z;
+    this.data = data;
+    this.setCardsPosition();
+  }
+
 
   /**
    * 对当前层级的卡片设置位置

@@ -1,8 +1,6 @@
 export default {
+  title: '麻了个麻 | 羊了个羊麻将版本',
   npmClient: 'pnpm',
-  jsMinifier: 'none',
-  // srcTranspiler:'swc'
-  mfsu: false,
   extraBabelPlugins: [
     "babel-plugin-transform-typescript-metadata",
   ]
