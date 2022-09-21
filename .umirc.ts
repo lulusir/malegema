@@ -4,6 +4,6 @@ export default {
   extraBabelPlugins: [
     "babel-plugin-transform-typescript-metadata",
   ],
-  publicPath: '/malegema',
-  base: '/malegema'
+  publicPath: '/malegema/',
+  base: '/malegema/'
 };

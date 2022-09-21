@@ -9,13 +9,13 @@ export enum ECardType {
 }
 
 export const ImagesMap = {
-  [ECardType.dong]: '/assets/z1.gif',
-  [ECardType.xi]: '/assets/z2.gif',
-  [ECardType.nan]: '/assets/z3.gif',
-  [ECardType.bei]: '/assets/z4.gif',
-  [ECardType.bai]: '/assets/z5.gif',
-  [ECardType.fa]: '/assets/z6.gif',
-  [ECardType.zhong]: '/assets/z7.gif',
+  [ECardType.dong]: '/malegema/assets/z1.gif',
+  [ECardType.xi]: '/malegema/assets/z2.gif',
+  [ECardType.nan]: '/malegema/assets/z3.gif',
+  [ECardType.bei]: '/malegema/assets/z4.gif',
+  [ECardType.bai]: '/malegema/assets/z5.gif',
+  [ECardType.fa]: '/malegema/assets/z6.gif',
+  [ECardType.zhong]: '/malegema/assets/z7.gif',
 };
 
 /**
