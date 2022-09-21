@@ -1,4 +1,9 @@
-import { Card, CardSlot, ECardType, Layer, levelZ } from './card.entity';
+import { entry, injectable, Presenter ,} from '@clean-js/presenter';
+import { Card, levelZ } from './card';
+import { Layer } from './layer';
+import { CardSlot } from './slot.entity';
+
+entry.showDevtool()
 
 export function shuffle(input: any[]) {
   const arr = [...input];
@@ -14,40 +19,72 @@ export function shuffle(input: any[]) {
   }
   return arr;
 }
-/**
- * 每个盒子模块
- */
+
 
 interface IViewState {
-  layer: Layer[];
-  allCard: Card[];
-  cardSlot: CardSlot;
+  data: {
+    id: number
+
+    left: number;
+
+    top: number;
+
+    z: number;
+
+    width: number;
+
+    height: number;
+
+    img: string;
+
+    blocked: boolean;
+
+    deleted: boolean;
+
+    deleting: boolean;
+  }[];
+  slot: {
+    top: number
+    left: number
+  }
 }
 
 const defaultState: () => IViewState = () => {
   return {
-    layer: [],
-    allCard: [],
-    cardSlot: new CardSlot(),
+    data: [],
+    slot: {
+      top: 0,
+      left: 0
+    }
   };
 };
 
-export class GamePresenter {
-  state: IViewState;
-  constructor() {
+@injectable()
+export class GamePresenter extends Presenter<IViewState> {
+  constructor(public slot: CardSlot) {
+    super();
     this.state = defaultState();
   }
 
-  /**
-   * 初始化3层
-   */
-  init() {
-    let nums = 16 + 12 + 8 + 2 + 12 + 16;
+  allCard: Card[] = [];
+  
+
+  setSlot() {
+    this.setState(s => {
+      s.slot.top = this.slot.top
+      s.slot.left = this.slot.left
+    })
+  }
+
+  initCards() {
+    let nums = 16 + 12 + 8;
+
     const types = Array(nums / 3)
       .fill(0)
       .map((_, i) => {
         return i % 7;
       });
+    
     const cards: Card[] = [];
 
     for (let i = 0; i < nums; i++) {
@@ -56,15 +93,13 @@ export class GamePresenter {
     }
 
     const data = shuffle(cards);
-    // console.log(cards.map((v) => v.type));
-    // console.log(data.map((v) => v.type));
 
     function getCard() {
       const c = data.pop();
-      c.deleted = false
-      return c
+      return c;
     }
-    const l1 = new Layer(
+
+    new Layer(
       [
         [getCard(), getCard(), getCard(), getCard(), getCard()],
         [getCard(), 0, 0, 0, getCard()],
@@ -77,7 +112,7 @@ export class GamePresenter {
       levelZ(1),
     );
 
-    const l2 = new Layer(
+    new Layer(
       [
         [getCard(), getCard(), getCard(), getCard()],
         [getCard(), 0, 0, getCard()],
@@ -89,7 +124,7 @@ export class GamePresenter {
       levelZ(2),
     );
 
-    const l3 = new Layer(
+    new Layer(
       [
         [getCard(), getCard(), getCard()],
         [getCard(), 0, getCard()],
@@ -100,126 +135,68 @@ export class GamePresenter {
       levelZ(3),
     );
 
-    const l4 = new Layer(
-      [
-        [getCard(), 0, getCard()],
-      ],
-      40,
-      60,
-      levelZ(4),
-    );
-    const l5 = new Layer(
-      [
-        [getCard(), getCard(), getCard(), getCard()],
-        [getCard(), 0, 0, getCard()],
-        [getCard(), 0, 0, getCard()],
-        [getCard(), getCard(), getCard(), getCard()],
-      ],
-      20,
-      30,
-      levelZ(5),
-    );
-    const l6 = new Layer(
-      [
-        [getCard(), getCard(), getCard(), getCard(), getCard()],
-        [getCard(), 0, 0, 0, getCard()],
-        [getCard(), 0, 0, 0, getCard()],
-        [getCard(), 0, 0, 0, getCard()],
-        [getCard(), getCard(), getCard(), getCard(), getCard()],
-      ],
-      0,
-      0,
-      levelZ(6),
-    );
-
-
-
-    this.state.layer = [l1, l2, l3, l4, l5, l6];
-    this.state.allCard = cards;
-    this.checkBlock();
-    this.forceUpdate();
+    this.allCard = cards;
+    this.updateView()
+    this.updateBlock();
   }
 
-  click(c: Card) {
-    if (!c.isBlocked) {
-      this.state.cardSlot.add(c)
-      this.forceUpdate()
-      this.state.cardSlot.remove(c).then(() => {
-        this.forceUpdate()
-        this.state.cardSlot.refresh()
-        this.checkBlock();
-        this.forceUpdate();
-      });
+  /**
+   * 初始化3层
+   */
+  init() {
+    this.setSlot()
+    this.initCards()
+    this.updateView()
+  }
 
-
+  click(id: number) {
+    const c = this.allCard.find(v => v.id === id)
+    if (c) {
+      if (!c.blocked) {
+        this.slot.add(c);
+        this.slot.remove(c).then(() => {
+          this.updateView()
+        });
+        this.updateView()
+      }
     }
   }
 
-  autoRemove() {
-    const window = {} as Record<ECardType, Card[]>
-    const canClick = this.state.allCard.filter(v => !v.deleted && !v.isBlocked)
+  /**
+   * 更新遮挡
+   */
+  updateBlock() {
+    this.allCard.forEach((v) => {
+      v.blocked = false;
+    });
 
-    let i = 0
-    let target: Card[] = []
-    while (i < canClick.length) {
-      const v = canClick[i]
-      i += 1
-      if (window[v.type]) {
-        window[v.type].push(v)
-      } else {
-        window[v.type] = []
-      }
-
-      if (window[v.type].length === 3) {
-        target = [...window[v.type]]
-        break
-      }
-    }
-
-    if (target.length) {
-      const v = target.pop()
-      if (v) {
-        this.click(v)
-      }
-      const timer = setInterval(() => {
-        const v = target.pop()
-        if (v) {
-          this.click(v)
-        } else {
-          clearInterval(timer)
-          this.autoRemove()
-        }
-      }, 300)
-
-    } else {
-      alert('无解')
-    }
-
-  }
-
-  checkBlock() {
-    this.state.allCard.forEach(v => {
-      v.isBlocked = false
-    })
-
-    this.state.allCard.forEach((a) => {
-      this.state.allCard.forEach((b) => {
+    this.allCard.forEach((a) => {
+      this.allCard.forEach((b) => {
         if (a !== b) {
           if (!(a.deleted || b.deleted)) {
             if (a.intersect(b)) {
               if (a.z > b.z) {
-                b.isBlocked = true;
+                b.blocked = true;
               } else {
-                a.isBlocked = true;
+                a.blocked = true;
               }
             }
           }
         }
-
       });
     });
-    this.forceUpdate()
+
+    this.updateView()
   }
 
-  forceUpdate = () => { };
+  updateView() {
+    console.log(this.allCard)
+    this.setState((s) => {
+      s.data = this.allCard.map((v) => {
+        return {
+          ...v,
+        };
+      });
+    });
+  }
 }
