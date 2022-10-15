@@ -31,6 +31,7 @@ interface IViewState {
   }
 }
 
+const mockBlocks: number[][] = [[1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], [0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], [0, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0], [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], [0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0], [0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0], [1, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0], [1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0], [0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0], [0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
 const defaultState: () => IViewState = () => {
   return {
     data: [],
@@ -49,7 +50,7 @@ export class GamePresenter extends Presenter<IViewState> {
   }
 
   allCard: Card[] = [];
-  
+
 
   setSlot() {
     this.setState(s => {
@@ -58,15 +59,26 @@ export class GamePresenter extends Presenter<IViewState> {
     })
   }
 
-  initCards() {
-    let nums = 16 + 12 + 8;
+  initCards(blocks = mockBlocks) {
+    const levels = 3 // 需要是3的倍数
+
+    let n = 0
+    blocks.forEach(u => {
+      u.forEach(v => {
+        if (v === 1) {
+          n += 1
+        }
+      })
+    })
+    let nums = n * levels
+
 
     const types = Array(nums / 3)
       .fill(0)
       .map((_, i) => {
         return i % 7;
       });
-    
+
     const cards: Card[] = [];
 
     for (let i = 0; i < nums; i++) {
@@ -80,44 +92,19 @@ export class GamePresenter extends Presenter<IViewState> {
       const c = data.pop();
       return c;
     }
-    
-    // 分配卡片，初始化层级
-    this.layer.init(
-      [
-        [getCard(), getCard(), getCard(), getCard(), getCard()],
-        [getCard(), 0, 0, 0, getCard()],
-        [getCard(), 0, 0, 0, getCard()],
-        [getCard(), 0, 0, 0, getCard()],
-        [getCard(), getCard(), getCard(), getCard(), getCard()],
-      ],
-      0,
-      0,
-      levelZ(1),
-    );
 
-    this.layer.init(
-      [
-        [getCard(), getCard(), getCard(), getCard()],
-        [getCard(), 0, 0, getCard()],
-        [getCard(), 0, 0, getCard()],
-        [getCard(), getCard(), getCard(), getCard()],
-      ],
-      20,
-      30,
-      levelZ(2),
-    );
-
-    this.layer.init(
-      [
-        [getCard(), getCard(), getCard()],
-        [getCard(), 0, getCard()],
-        [getCard(), getCard(), getCard()],
-      ],
-      40,
-      60,
-      levelZ(3),
-    );
-
+    for (let i = 0; i < levels; i++) {
+      this.layer.init(
+        blocks.map(v => {
+          return v.map(u => {
+            return u === 1 ? getCard() : 0;
+          })
+        }),
+        i * 4,
+        i * 6,
+        levelZ(i + 1),
+      );
+    }
     this.allCard = cards;
   }
 
@@ -139,11 +126,33 @@ export class GamePresenter extends Presenter<IViewState> {
   /**
    * 初始化3层
    */
-  init() {
+  init(blocks = mockBlocks) {
+    const data = localStorage.getItem('blocks');
+    if (data) {
+      console.log(data, '==data')
+      blocks = JSON.parse(data) as unknown as number[][]
+    }
+
+    this.slot.init()
     this.setSlot()
-    this.initCards()
+    this.initCards(blocks)
     this.updateBlock();
     this.updateView()
+  }
+
+  saveToLocal(blocks = mockBlocks) {
+    localStorage.setItem('blocks', JSON.stringify(blocks));
+  }
+
+  removeCache() {
+    localStorage.removeItem('blocks',);
+  }
+
+  loadByLocal() {
+    const data = localStorage.getItem('blocks');
+    if (data) {
+      this.init(JSON.parse(data))
+    }
   }
 
   click(id: number) {
@@ -153,7 +162,7 @@ export class GamePresenter extends Presenter<IViewState> {
         const canContinue = this.slot.add(c);
         if (!canContinue) {
           alert('游戏结束咧')
-        }  else {
+        } else {
           this.slot.remove(c).then(() => {
             this.updateBlock()
             this.updateView()

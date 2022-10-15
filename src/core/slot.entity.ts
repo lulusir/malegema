@@ -1,11 +1,15 @@
 import { Card } from './card';
 
 export class CardSlot {
-  left = 0;
+  left = 180;
 
-  top = 400;
+  top = 700;
 
   data: Card[] = [];
+
+  init() {
+    this.data = []
+  }
 
   add(card: Card) {
     if (this.data.length < 7) {
@@ -42,7 +46,7 @@ export class CardSlot {
     let success = count === 3;
 
     if (success) {
-      const p = Promise.all(this.data.filter( v => v.type === card.type).map(v => v.delete()))
+      const p = Promise.all(this.data.filter(v => v.type === card.type).map(v => v.delete()))
       this.data = this.data.filter((v) => v.type !== card.type);
       this.refresh();
       return p

@@ -27,9 +27,9 @@ export const levelZ = (level = 1) => {
 };
 
 export class Card {
-  static CardWidth = 40;
+  static CardWidth = 20;
 
-  static CardHeight = 56;
+  static CardHeight = 28;
 
   static _id = 0
 
@@ -75,9 +75,9 @@ export class Card {
     const a = this;
     return (
       Math.abs(a.left + a.width / 2 - b.left - b.width / 2) <
-        (a.width + b.width) / 2 &&
+      (a.width + b.width) / 2 &&
       Math.abs(a.top + a.height / 2 - b.top - b.height / 2) <
-        (a.height + b.height) / 2
+      (a.height + b.height) / 2
     );
   }
 
