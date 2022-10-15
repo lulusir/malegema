@@ -73,17 +73,13 @@ export class GamePresenter extends Presenter<IViewState> {
     let nums = n * levels
 
 
-    const types = Array(nums / 3)
-      .fill(0)
-      .map((_, i) => {
-        return i % 7;
-      });
 
     const cards: Card[] = [];
 
-    for (let i = 0; i < nums; i++) {
-      const element = new Card(types[i % 12]);
-      cards.push(element);
+    for (let i = 0; i < nums; i += 3) {
+      cards.push(new Card(i % 7));
+      cards.push(new Card(i % 7));
+      cards.push(new Card(i % 7));
     }
 
     const data = this.shuffle(cards);
@@ -129,7 +125,6 @@ export class GamePresenter extends Presenter<IViewState> {
   init(blocks = mockBlocks) {
     const data = localStorage.getItem('blocks');
     if (data) {
-      console.log(data, '==data')
       blocks = JSON.parse(data) as unknown as number[][]
     }
 
