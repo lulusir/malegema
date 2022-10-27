@@ -4,12 +4,14 @@ import { Layer } from './layer';
 import { CardSlot } from './slot.entity';
 
 interface IViewState {
-  blocks: boolean[][]
+  blocks: number[][] // 0 / 1
 }
 
 const defaultState: () => IViewState = () => {
   return {
-    blocks: Array(25).fill(Array(25).fill(false)),
+    blocks: Array(25).fill(1).map(() => {
+      return Array(25).fill(0)
+    }),
   };
 };
 
@@ -22,11 +24,11 @@ export class EditorPresenter extends Presenter<IViewState> {
 
   draw(x: number, y: number) {
     this.setState(s => {
-      s.blocks[x][y] = !s.blocks[x][y]
+      s.blocks[x][y] = s.blocks[x][y] === 0? 1 : 0
     })
   }
 
   getData() {
-    return this.state.blocks.map(v => v.map(u => u ? 1 : 0))
+    return this.state.blocks
   }
 }
